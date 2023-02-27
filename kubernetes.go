@@ -111,7 +111,7 @@ func (mi *ModuleInstance) newClient(c goja.ConstructorCall) *goja.Object {
 	var config *rest.Config
 	var err error
 
-	if len(call.Arguments) > 0 {
+	if len(c.Arguments) > 0 {
 		var options KubeConfig
 		err = rt.ExportTo(c.Argument(0), &options)
 		if err != nil {
