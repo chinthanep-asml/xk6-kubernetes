@@ -107,13 +107,31 @@ func (mi *ModuleInstance) newClient(c goja.ConstructorCall) *goja.Object {
 	obj := &Kubernetes{}
 	
 	fmt.Printf("Creating client")
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		common.Throw(rt, err)
+
+	var config *rest.Config
+	var err error
+
+	if len(call.Arguments) > 0 {
+		var options KubeConfig
+		err = rt.ExportTo(c.Argument(0), &options)
+		if err != nil {
+			common.Throw(rt,
+				fmt.Errorf("Error while using kubeconfig argument : %w", err))
+		}
+		config, err = getClientConfig(options)
+		if err != nil {
+			common.Throw(rt, err)
+		}
+	} else {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			common.Throw(rt, err)
+		}
 	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		common.Throw(rt, err)
+
+	clientset, err2 := kubernetes.NewForConfig(config)
+	if err2 != nil {
+		common.Throw(rt, err2)
 	}
 	obj.client = clientset
 
